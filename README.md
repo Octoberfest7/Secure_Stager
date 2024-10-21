@@ -16,7 +16,7 @@ Secure stager functionality within Cobalt Strike is particularly attractive beca
 
 ## Usage
 
-Command Line Syntax: `./secure_stager.py </path/to/raw/file> <HTTPS url that stage will be hosted at>`.
+Command Line Syntax: `./secure_stager.py </path/to/payload/stage.bin> <HTTPS url that stage will be hosted at>`.
 
 Example: `./secure_stager.py /home/kali/beacon_x64.bin https://www.myhostingdomain.com/aboutus`.
 
@@ -24,11 +24,14 @@ After the python script completes, host the produced encrypted stage at the URL 
 
 ## Notes
 
-There are no AV/EDR evasion methods built into the stager; that is the job of your shellcode runner. After the stage has been downloaded and verified it will be executed in the same thread as the stager via function pointer.
+1. There are no AV/EDR evasion methods built into the stager; that is the job of your shellcode runner.  
+2. After the stage has been downloaded and verified it will be executed in the same thread as the stager via function pointer.  
+3. The stager currently only supports HTTPS connections, so make sure you host the stage using SSL.  
 
 ## Further work
 1. Make stager proxy-aware.  
 2. Add customization options for request headers.
+3. Implement alternate protocols to retrieve payload stage
 
 ## Credits
 1. [@C5pider](https://x.com/C5pider) for Stardust

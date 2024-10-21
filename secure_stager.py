@@ -22,7 +22,7 @@ def xor(binary_blob, key):
 
 # Validate args
 if len(sys.argv) < 3:
-    print("Usage: ./secure_stager.py </path/to/raw/file> <HTTPS url that stage will be hosted at>")
+    print("Usage: ./secure_stager.py </path/to/payload/stage.bin> <HTTPS url that stage will be hosted at>")
     print("Example: ./secure_stager.py /home/kali/beacon_x64.bin https://www.myhostingdomain.com/aboutus")
     sys.exit()
 
