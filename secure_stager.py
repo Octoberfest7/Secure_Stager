@@ -5,6 +5,7 @@ import os
 import hashlib
 import subprocess
 from urllib.parse import urlparse
+import shutil
 
 def xor(binary_blob, key):
     # Convert the key to bytes
@@ -57,7 +58,7 @@ enc_stage = f"{outdir}{url.path}"
 stager = f"{outdir}{url.path}_stager.bin"
 
 # Rename original raw payload
-os.rename(sys.argv[1], original_stage)
+shutil.move(sys.argv[1], original_stage)
 
 # Calculate MD5 hash of raw payload
 stage_md5 = hashlib.md5(stage).hexdigest()
@@ -85,7 +86,7 @@ while True:
         pass
 
 # Rename stager
-os.rename("Stardust/bin/stardust.x64.bin", stager)
+shutil.move("Stardust/bin/stardust.x64.bin", stager)
 
 # Print info
 print("[SECURE STAGER]")
